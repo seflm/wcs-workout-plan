@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="theme-color" content="#0f1115" />
+<title>WCS + Aesthetics — 4-Day Plan</title>
+<style>
+  :root{
+    --bg:#0f1115; --bg2:#171a21; --card:#1c2029; --card2:#232834;
+    --txt:#e8ebf0; --muted:#98a0b0; --line:#2a2f3a;
+    --accent:#5b8cff; --accent2:#7a5bff;
+    --wcs:#33c2a6; --looks:#ff8a5b; --both:#b07bff;
+    --ok:#3ddc97; --warn:#ffce5b;
+    --radius:16px;
+    font-size:16px;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0; padding:0;}
+  body{
+    background:linear-gradient(180deg,#0f1115,#0c0e12 60%);
+    color:var(--txt);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    min-height:100vh;
+    padding:env(safe-area-inset-top) env(safe-area-inset-right) calc(96px + env(safe-area-inset-bottom)) env(safe-area-inset-left);
+    line-height:1.45;
+  }
+  .wrap{max-width:560px; margin:0 auto; padding:0 14px;}
+
+  /* Header */
+  header{padding:18px 0 10px;}
+  h1{font-size:1.25rem; margin:0; letter-spacing:.2px;}
+  .sub{color:var(--muted); font-size:.82rem; margin-top:3px;}
+
+  /* Stats strip */
+  .stats{display:flex; gap:8px; margin-top:14px;}
+  .stat{flex:1; background:var(--card); border:1px solid var(--line); border-radius:14px; padding:10px 8px; text-align:center;}
+  .stat .num{font-size:1.4rem; font-weight:700; line-height:1;}
+  .stat .lbl{font-size:.66rem; color:var(--muted); text-transform:uppercase; letter-spacing:.5px; margin-top:5px;}
+
+  /* Day tabs */
+  .tabs{display:grid; grid-template-columns:repeat(4,1fr); gap:6px; margin:16px 0 6px; position:sticky; top:0; z-index:20;
+        background:linear-gradient(180deg,#0f1115 70%,rgba(15,17,21,0)); padding:8px 0;}
+  .tab{background:var(--card); border:1px solid var(--line); border-radius:12px; padding:9px 4px; text-align:center; cursor:pointer; transition:.15s;}
+  .tab .d{font-size:.62rem; color:var(--muted); text-transform:uppercase; letter-spacing:.5px;}
+  .tab .t{font-size:.82rem; font-weight:600; margin-top:2px;}
+  .tab.active{background:linear-gradient(135deg,var(--accent),var(--accent2)); border-color:transparent;}
+  .tab.active .d,.tab.active .t{color:#fff;}
+  .tab.done::after{content:"✓"; display:block; font-size:.6rem; color:var(--ok); margin-top:1px;}
+  .tab.active.done::after{color:#fff;}
+
+  .dayhead{display:flex; align-items:baseline; justify-content:space-between; margin:14px 2px 4px;}
+  .dayhead .name{font-size:1.05rem; font-weight:700;}
+  .dayhead .meta{font-size:.74rem; color:var(--muted);}
+  .focusline{font-size:.78rem; color:var(--muted); margin:0 2px 10px; line-height:1.4;}
+
+  /* Exercise cards */
+  .ex{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:14px; margin-bottom:12px;}
+  .ex.complete{border-color:#2b5a45; background:linear-gradient(180deg,#16241d,#1a1e26);}
+  .ex .top{display:flex; justify-content:space-between; gap:10px; align-items:flex-start;}
+  .ex .nm{font-size:1rem; font-weight:650; margin:0;}
+  .ex .scheme{font-size:.78rem; color:var(--muted); margin-top:3px;}
+  .ex .scheme b{color:var(--txt); font-weight:600;}
+  .tag{font-size:.6rem; font-weight:700; text-transform:uppercase; letter-spacing:.4px; padding:4px 7px; border-radius:999px; white-space:nowrap;}
+  .tag.wcs{background:rgba(51,194,166,.16); color:var(--wcs);}
+  .tag.looks{background:rgba(255,138,91,.16); color:var(--looks);}
+  .tag.both{background:rgba(176,123,255,.18); color:var(--both);}
+
+  .cue{font-size:.78rem; color:var(--muted); margin:9px 0 0; padding-left:10px; border-left:2px solid var(--line);}
+  .why{font-size:.74rem; color:var(--muted); margin-top:7px; display:none;}
+  .why.show{display:block;}
+  .alt{font-size:.72rem; color:var(--muted); margin-top:8px;}
+  .alt b{color:#9aa3b3; font-weight:600;}
+  .whybtn{background:none; border:none; color:var(--accent); font-size:.72rem; padding:6px 0 0; cursor:pointer;}
+
+  /* set + weight row */
+  .track{display:flex; align-items:center; gap:8px; margin-top:12px; flex-wrap:wrap;}
+  .sets{display:flex; gap:6px;}
+  .setbtn{width:38px; height:38px; border-radius:10px; border:1px solid var(--line); background:var(--card2); color:var(--muted);
+          font-size:.85rem; font-weight:700; cursor:pointer; transition:.12s;}
+  .setbtn.on{background:var(--ok); color:#08130d; border-color:transparent;}
+  .wt{margin-left:auto; display:flex; align-items:center; gap:6px;}
+  .wt input{width:64px; background:var(--card2); border:1px solid var(--line); color:var(--txt); border-radius:10px;
+            padding:8px; font-size:.9rem; text-align:center;}
+  .wt span{font-size:.72rem; color:var(--muted);}
+
+  /* timer + complete */
+  .actions{position:fixed; left:0; right:0; bottom:0; z-index:30;
+           background:linear-gradient(0deg,#0c0e12 70%,rgba(12,14,18,0)); padding:10px 14px calc(12px + env(safe-area-inset-bottom));}
+  .actions .inner{max-width:560px; margin:0 auto; display:flex; gap:8px;}
+  .btn{flex:1; border:none; border-radius:14px; padding:14px; font-size:.92rem; font-weight:700; cursor:pointer;}
+  .btn.timer{background:var(--card2); color:var(--txt); border:1px solid var(--line); flex:0 0 118px;}
+  .btn.timer.run{color:var(--warn); border-color:var(--warn);}
+  .btn.done{background:linear-gradient(135deg,var(--accent),var(--accent2)); color:#fff;}
+  .btn.done.is-done{background:#1f3a2c; color:var(--ok); border:1px solid #2b5a45;}
+
+  /* history / info collapsibles */
+  details{background:var(--card); border:1px solid var(--line); border-radius:14px; margin-top:12px; padding:0 14px;}
+  details summary{cursor:pointer; padding:13px 0; font-weight:650; font-size:.9rem; list-style:none;}
+  details summary::-webkit-details-marker{display:none;}
+  details summary::after{content:"＋"; float:right; color:var(--muted);}
+  details[open] summary::after{content:"－";}
+  .hist{font-size:.8rem; color:var(--muted); padding-bottom:12px;}
+  .hist .row{display:flex; justify-content:space-between; padding:6px 0; border-top:1px solid var(--line);}
+  .hist .row:first-child{border-top:none;}
+  .legend{display:flex; gap:14px; flex-wrap:wrap; font-size:.72rem; color:var(--muted); padding-bottom:12px;}
+  .legend i{width:9px; height:9px; border-radius:3px; display:inline-block; margin-right:5px; vertical-align:middle;}
+  .infop{font-size:.8rem; color:var(--muted); padding-bottom:14px; line-height:1.5;}
+  .infop b{color:var(--txt);}
+  .danger{background:none; border:1px solid #5a2b2b; color:#ff7b7b; border-radius:10px; padding:9px 12px; font-size:.78rem; cursor:pointer; margin-bottom:14px;}
+  .toast{position:fixed; bottom:90px; left:50%; transform:translateX(-50%); background:var(--ok); color:#08130d;
+         padding:10px 18px; border-radius:999px; font-weight:700; font-size:.85rem; opacity:0; pointer-events:none; transition:.25s; z-index:50;}
+  .toast.show{opacity:1; transform:translateX(-50%) translateY(-6px);}
+  .footnote{text-align:center; color:#5a626f; font-size:.7rem; margin:18px 0 4px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>WCS + Aesthetics</h1>
+    <div class="sub">4-day plan · built for leading & the V-taper · ~25–40 min/session</div>
+    <div class="stats">
+      <div class="stat"><div class="num" id="stWeek">0</div><div class="lbl">This week</div></div>
+      <div class="stat"><div class="num" id="stStreak">0</div><div class="lbl">Streak (wk)</div></div>
+      <div class="stat"><div class="num" id="stTotal">0</div><div class="lbl">Total sessions</div></div>
+    </div>
+  </header>
+
+  <nav class="tabs" id="tabs"></nav>
+
+  <div class="dayhead">
+    <div class="name" id="dayName">—</div>
+    <div class="meta" id="dayMeta"></div>
+  </div>
+  <div class="focusline" id="dayFocus"></div>
+
+  <div id="exList"></div>
+
+  <details>
+    <summary>How to use this plan</summary>
+    <div class="infop">
+      <p><b>Order:</b> Do the days in sequence (1→2→3→4) with a rest day whenever you need one — e.g. Mon/Tue/Thu/Fri. As a beginner, never stress about hitting all 4 perfectly; 3 solid weeks beats 4 burnt-out ones.</p>
+      <p><b>Sets:</b> Tap a numbered square each time you finish a set. <b>Weight:</b> type what you used — it's remembered and pre-filled next time, so you can chase small jumps.</p>
+      <p><b>Progress:</b> When every move's last weight feels easy for the top of the rep range, add a little (~2.5 kg lower body, ~1–2 kg upper). That's the whole game.</p>
+      <p><b>Rest:</b> ~60–90s between sets. Use the timer button. Warm up 3–4 min on a bike/rower + 1 light set of the first exercise.</p>
+      <div class="legend">
+        <span><i style="background:var(--wcs)"></i>WCS-focused</span>
+        <span><i style="background:var(--looks)"></i>Looks-focused</span>
+        <span><i style="background:var(--both)"></i>Both</span>
+      </div>
+    </div>
+  </details>
+
+  <details>
+    <summary>Why these muscles?</summary>
+    <div class="infop">
+      <p><b>WCS (leader):</b> the dance is body-led — connection comes from your <b>core and lats</b>, not your arms. Add <b>glutes/hamstrings</b> for the anchor & grounded "settle," <b>legs + ankles</b> for balance and redirections, and <b>postural back/rear delts</b> for a tall frame.</p>
+      <p><b>Looks (fastest payoff):</b> the <b>V-taper</b> — <b>lateral delts</b> (shoulder width), <b>lats</b> (the flare), <b>upper chest</b>, plus <b>arms</b> and a tight <b>core</b>.</p>
+      <p>The overlap (lats, core, shoulders, glutes/legs) is why a handful of compound lifts covers both at once.</p>
+    </div>
+  </details>
+
+  <details id="histBox">
+    <summary>History</summary>
+    <div class="hist" id="histList"></div>
+    <button class="danger" id="resetBtn">Reset all data</button>
+  </details>
+
+  <div class="footnote">Data saved on this device only (localStorage). Not medical advice.</div>
+</div>
+
+<div class="actions">
+  <div class="inner">
+    <button class="btn timer" id="timerBtn">Rest 90s</button>
+    <button class="btn done" id="doneBtn">Complete session</button>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ---------------- Plan data ---------------- */
+const PLAN = [
+  {
+    key:"d1", day:"Day 1", name:"Upper · Pull",
+    focus:"Lats, mid-back, rear delts & shoulders — your WCS connection muscles plus the V-taper flare.",
+    ex:[
+      {id:"d1a", name:"Lat Pulldown", scheme:"3 × 8–12", tag:"both",
+        cue:"Drive elbows down to your ribs, chest tall. Feel the lats, not the arms.",
+        why:"#1 priority: lats power your WCS connection/leverage and create the V-taper.",
+        alt:"Assisted pull-up · Neutral-grip pulldown"},
+      {id:"d1b", name:"Seated Cable Row", scheme:"3 × 10–12", tag:"both",
+        cue:"Squeeze shoulder blades back, don't shrug. Slow on the way out.",
+        why:"Mid-back thickness for posture and a strong, upright dance frame.",
+        alt:"Chest-supported machine row · One-arm dumbbell row"},
+      {id:"d1c", name:"Dumbbell Lateral Raise", scheme:"3 × 12–15", tag:"looks",
+        cue:"Lead with elbows, raise to shoulder height, slight lean forward. Light & strict.",
+        why:"Lateral delts = shoulder width, the single biggest visual upgrade.",
+        alt:"Cable lateral raise · Machine lateral raise"},
+      {id:"d1d", name:"Face Pull", scheme:"2 × 15", tag:"wcs",
+        cue:"Pull rope to your forehead, thumbs back. Open the chest.",
+        why:"Rear delts/upper back keep shoulders back — posture & a clean dance frame.",
+        alt:"Reverse pec-deck · Band pull-apart"},
+      {id:"d1e", name:"Plank", scheme:"3 × 30–45s", tag:"both",
+        cue:"Squeeze glutes, ribs down, straight line. Brace like someone's about to push you.",
+        why:"Deep-core bracing is the foundation of every body-led WCS move.",
+        alt:"RKC plank · Ab-wheel rollout"}
+    ]
+  },
+  {
+    key:"d2", day:"Day 2", name:"Lower · Posterior",
+    focus:"Glutes, hamstrings & calves/ankles — the anchor step, the grounded 'settle,' and balance.",
+    ex:[
+      {id:"d2a", name:"Goblet Squat", scheme:"3 × 10–12", tag:"both",
+        cue:"Hold a dumbbell at your chest, sit straight down, knees track over toes.",
+        why:"Beginner-friendly full-leg strength for grounded knee bend and power.",
+        alt:"Leg press · Hack squat"},
+      {id:"d2b", name:"Dumbbell Romanian Deadlift", scheme:"3 × 10", tag:"wcs",
+        cue:"Hinge at hips, soft knees, bar close to legs. Feel the hamstring stretch.",
+        why:"The hip hinge = the anchor step. Builds glutes/hams for the grounded settle.",
+        alt:"Barbell RDL · 45° back extension"},
+      {id:"d2c", name:"Hip Thrust", scheme:"3 × 10–12", tag:"both",
+        cue:"Drive through heels, squeeze glutes hard at the top, ribs down.",
+        why:"Strong glutes drive the anchor and compression — and round out the look.",
+        alt:"Glute-bridge machine · Cable pull-through"},
+      {id:"d2d", name:"Standing Calf Raise", scheme:"3 × 15", tag:"wcs",
+        cue:"Full stretch at bottom, pause at the top. Slow.",
+        why:"Calf/ankle strength = foot tone and the balance WCS lives on.",
+        alt:"Seated calf raise · Leg-press calf press"},
+      {id:"d2e", name:"Dead Bug", scheme:"2 × 10/side", tag:"wcs",
+        cue:"Lower opposite arm & leg, low back glued to the floor.",
+        why:"Anti-extension core control — keeps your center stable while you move.",
+        alt:"Bird dog · Hanging knee raise"}
+    ]
+  },
+  {
+    key:"d3", day:"Day 3", name:"Upper · Push",
+    focus:"Upper chest, shoulders & arms for fullness — plus more lats, your top priority.",
+    ex:[
+      {id:"d3a", name:"Incline Dumbbell Press", scheme:"3 × 8–12", tag:"looks",
+        cue:"Bench at ~30°, press up and slightly together. Control the descent.",
+        why:"Upper chest fills out the shirt — high aesthetic payoff.",
+        alt:"Incline machine press · Incline barbell press"},
+      {id:"d3b", name:"Seated Dumbbell Shoulder Press", scheme:"3 × 8–10", tag:"both",
+        cue:"Press overhead without flaring elbows fully. Brace the core.",
+        why:"Capped delts add width and give you a strong overhead/frame position.",
+        alt:"Machine shoulder press · Arnold press"},
+      {id:"d3c", name:"Lat Pulldown (or Assisted Pull-up)", scheme:"3 × 8–12", tag:"both",
+        cue:"Same as Day 1 — lats lead. This is your 2nd weekly lat hit.",
+        why:"Lats are priority #1, so they get trained twice a week.",
+        alt:"Assisted pull-up · Chest-supported row"},
+      {id:"d3d", name:"Dumbbell Lateral Raise", scheme:"2 × 15", tag:"looks",
+        cue:"Light, strict, controlled. Width is built with reps, not ego.",
+        why:"Second weekly hit for the shoulder-width muscle that matters most.",
+        alt:"Cable lateral raise · Machine lateral raise"},
+      {id:"d3e", name:"Triceps Rope Pushdown", scheme:"2 × 12–15", tag:"looks",
+        cue:"Elbows pinned to sides, spread the rope at the bottom.",
+        why:"Triceps are most of the arm — visible payoff in short sleeves.",
+        alt:"Overhead rope extension · Bench dips"}
+    ]
+  },
+  {
+    key:"d4", day:"Day 4", name:"Lower · Quads & Balance",
+    focus:"Quads, single-leg balance & rotational core — turns, redirections and body-led rotation.",
+    ex:[
+      {id:"d4a", name:"Leg Press", scheme:"3 × 10–12", tag:"both",
+        cue:"Feet shoulder-width, lower until ~90°, don't lock out hard at the top.",
+        why:"Safe, beginner-friendly quad/glute strength for grounded power.",
+        alt:"Hack squat · Goblet squat"},
+      {id:"d4b", name:"Walking Lunge", scheme:"2 × 10/leg", tag:"wcs",
+        cue:"Long step, torso tall, control the wobble. Light dumbbells optional.",
+        why:"Single-leg strength & balance — exactly what turns and redirections need.",
+        alt:"Bulgarian split squat · Reverse lunge"},
+      {id:"d4c", name:"Lying Leg Curl", scheme:"3 × 12", tag:"both",
+        cue:"Curl all the way, slow negative. No hips popping up.",
+        why:"Balances the hamstrings for healthy knees and the grounded settle.",
+        alt:"Seated leg curl · Nordic curl"},
+      {id:"d4d", name:"Cable Pallof Press", scheme:"2 × 10/side", tag:"wcs",
+        cue:"Press the handle straight out and resist the twist. Brace.",
+        why:"Anti-rotation core — the exact strength behind a clean body lead.",
+        alt:"Band anti-rotation hold · Suitcase carry"},
+      {id:"d4e", name:"Cable Woodchop", scheme:"2 × 10/side", tag:"wcs",
+        cue:"Rotate from the core, hips follow, arms just hold on.",
+        why:"Rotational power for spins, whips and body-led direction changes.",
+        alt:"Russian twist · Landmine rotation"}
+    ]
+  }
+];
+
+/* ---------------- State / storage ---------------- */
+const LS_KEY = "wcsPlan.v1";
+function load(){ try{ return JSON.parse(localStorage.getItem(LS_KEY)) || {}; }catch(e){ return {}; } }
+function save(){ localStorage.setItem(LS_KEY, JSON.stringify(state)); }
+let state = load();
+state.weights = state.weights || {};   // exId -> string
+state.sets = state.sets || {};         // exId -> count completed (today)
+state.history = state.history || [];   // [{date, dayKey, dayName}]
+state.lastReset = state.lastReset || todayStr();
+
+function todayStr(){ const d=new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
+function weekKey(dateStr){
+  const d = dateStr? new Date(dateStr) : new Date();
+  const onejan = new Date(d.getFullYear(),0,1);
+  const week = Math.ceil((((d - onejan)/86400000)+onejan.getDay()+1)/7);
+  return d.getFullYear()+"-W"+week;
+}
+
+/* New day? clear today's transient set checkmarks (weights persist). */
+if(state.lastReset !== todayStr()){ state.sets = {}; state.lastReset = todayStr(); save(); }
+
+/* ---------------- Render ---------------- */
+let activeDay = state.activeDay || 0;
+const tabsEl = document.getElementById("tabs");
+const exListEl = document.getElementById("exList");
+
+function setsTarget(scheme){ const m = scheme.match(/^(\d+)/); return m? parseInt(m[1],10) : 3; }
+function isDayDone(day){ return day.ex.every(e => (state.sets[e.id]||0) >= setsTarget(e.scheme)); }
+
+function renderTabs(){
+  tabsEl.innerHTML = "";
+  PLAN.forEach((d,i)=>{
+    const t = document.createElement("div");
+    t.className = "tab" + (i===activeDay?" active":"") + (isDayDone(d)?" done":"");
+    t.innerHTML = `<div class="d">${d.day}</div><div class="t">${d.name.split(" · ")[1]}</div>`;
+    t.onclick = ()=>{ activeDay=i; state.activeDay=i; save(); renderAll(); };
+    tabsEl.appendChild(t);
+  });
+}
+
+function renderDay(){
+  const d = PLAN[activeDay];
+  document.getElementById("dayName").textContent = d.name;
+  document.getElementById("dayMeta").textContent = d.ex.length + " exercises";
+  document.getElementById("dayFocus").textContent = d.focus;
+
+  exListEl.innerHTML = "";
+  d.ex.forEach(e=>{
+    const target = setsTarget(e.scheme);
+    const done = state.sets[e.id]||0;
+    const card = document.createElement("div");
+    card.className = "ex" + (done>=target?" complete":"");
+
+    let setBtns = "";
+    for(let s=1;s<=target;s++){ setBtns += `<button class="setbtn ${s<=done?"on":""}" data-ex="${e.id}" data-set="${s}">${s}</button>`; }
+
+    card.innerHTML = `
+      <div class="top">
+        <div>
+          <p class="nm">${e.name}</p>
+          <div class="scheme"><b>${e.scheme}</b> · rest 60–90s</div>
+        </div>
+        <span class="tag ${e.tag}">${e.tag==="both"?"WCS + Looks":e.tag.toUpperCase()}</span>
+      </div>
+      <div class="cue">${e.cue}</div>
+      <div class="alt"><b>Swaps:</b> ${e.alt}</div>
+      <div class="why" id="why-${e.id}">${e.why}</div>
+      <button class="whybtn" data-why="${e.id}">Why this?</button>
+      <div class="track">
+        <div class="sets">${setBtns}</div>
+        <div class="wt"><input type="text" inputmode="decimal" placeholder="–" value="${state.weights[e.id]||""}" data-wt="${e.id}"><span>kg</span></div>
+      </div>`;
+    exListEl.appendChild(card);
+  });
+
+  // set buttons
+  exListEl.querySelectorAll(".setbtn").forEach(b=>{
+    b.onclick = ()=>{
+      const id=b.dataset.ex, s=parseInt(b.dataset.set,10);
+      const cur=state.sets[id]||0;
+      state.sets[id] = (s<=cur) ? s-1 : s;  // tap a done set to undo down to it
+      save(); renderDay(); renderTabs();
+    };
+  });
+  // weight inputs
+  exListEl.querySelectorAll("input[data-wt]").forEach(inp=>{
+    inp.onchange = ()=>{ state.weights[inp.dataset.wt] = inp.value.trim(); save(); };
+  });
+  // why toggles
+  exListEl.querySelectorAll(".whybtn").forEach(btn=>{
+    btn.onclick = ()=>{
+      const w=document.getElementById("why-"+btn.dataset.why);
+      const open=w.classList.toggle("show");
+      btn.textContent = open ? "Hide" : "Why this?";
+    };
+  });
+
+  // complete button reflects day state
+  const dn = document.getElementById("doneBtn");
+  if(isDayDone(PLAN[activeDay])){ dn.classList.add("is-done"); dn.textContent="Session complete ✓"; }
+  else { dn.classList.remove("is-done"); dn.textContent="Complete session"; }
+}
+
+function renderStats(){
+  const total = state.history.length;
+  const thisWeek = state.history.filter(h=>weekKey(h.date)===weekKey()).length;
+  // streak: consecutive weeks (including this or last) with >=3 sessions
+  const byWeek = {};
+  state.history.forEach(h=>{ const w=weekKey(h.date); byWeek[w]=(byWeek[w]||0)+1; });
+  let streak=0; let probe=new Date();
+  for(let i=0;i<104;i++){
+    const w=weekKey(probe.toISOString().slice(0,10));
+    if((byWeek[w]||0)>=3) streak++;
+    else if(i>0) break; // allow current (in-progress) week to be incomplete
+    probe.setDate(probe.getDate()-7);
+  }
+  document.getElementById("stWeek").textContent=thisWeek;
+  document.getElementById("stStreak").textContent=streak;
+  document.getElementById("stTotal").textContent=total;
+}
+
+function renderHistory(){
+  const el=document.getElementById("histList");
+  if(!state.history.length){ el.innerHTML='<div style="padding:8px 0">No sessions logged yet. Finish a day and tap “Complete session”.</div>'; return; }
+  el.innerHTML = state.history.slice().reverse().slice(0,30)
+    .map(h=>`<div class="row"><span>${h.dayName}</span><span>${h.date}</span></div>`).join("");
+}
+
+function renderAll(){ renderTabs(); renderDay(); renderStats(); renderHistory(); }
+
+/* ---------------- Complete session ---------------- */
+document.getElementById("doneBtn").onclick = ()=>{
+  const d=PLAN[activeDay];
+  state.history.push({date:todayStr(), dayKey:d.key, dayName:d.name});
+  // reset this day's set checkmarks so it's fresh next time; weights stay
+  d.ex.forEach(e=> state.sets[e.id]=0);
+  // auto-advance to next day
+  activeDay=(activeDay+1)%PLAN.length; state.activeDay=activeDay;
+  save(); renderAll();
+  toast("Logged! Next up: "+PLAN[activeDay].name);
+};
+
+/* ---------------- Rest timer ---------------- */
+let tIv=null, tLeft=0;
+const tBtn=document.getElementById("timerBtn");
+tBtn.onclick=()=>{
+  if(tIv){ clearInterval(tIv); tIv=null; tBtn.classList.remove("run"); tBtn.textContent="Rest 90s"; return; }
+  tLeft=90; tBtn.classList.add("run");
+  tick();
+  tIv=setInterval(()=>{ tLeft--; if(tLeft<=0){ clearInterval(tIv); tIv=null; tBtn.classList.remove("run"); tBtn.textContent="Go!"; buzz(); setTimeout(()=>{tBtn.textContent="Rest 90s";},1500); } else tick(); },1000);
+};
+function tick(){ tBtn.textContent=tLeft+"s"; }
+function buzz(){ if(navigator.vibrate) navigator.vibrate([120,60,120]); }
+
+/* ---------------- Reset ---------------- */
+document.getElementById("resetBtn").onclick=()=>{
+  if(confirm("Erase all weights, progress and history on this device?")){
+    localStorage.removeItem(LS_KEY); state={weights:{},sets:{},history:[],lastReset:todayStr(),activeDay:0}; activeDay=0; save(); renderAll(); toast("Reset done");
+  }
+};
+
+/* ---------------- Toast ---------------- */
+let toastIv=null;
+function toast(msg){ const t=document.getElementById("toast"); t.textContent=msg; t.classList.add("show"); clearTimeout(toastIv); toastIv=setTimeout(()=>t.classList.remove("show"),2200); }
+
+renderAll();
+</script>
+</body>
+</html>
