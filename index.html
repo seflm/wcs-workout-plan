@@ -31,6 +31,11 @@
   header{padding:18px 0 10px;}
   h1{font-size:1.25rem; margin:0; letter-spacing:.2px;}
   .sub{color:var(--muted); font-size:.82rem; margin-top:3px;}
+  .htop{display:flex; justify-content:space-between; align-items:flex-start; gap:10px;}
+  .mode{display:flex; background:var(--card); border:1px solid var(--line); border-radius:999px; padding:3px; flex-shrink:0;}
+  .mode button{background:none; border:none; color:var(--muted); font-size:.78rem; font-weight:600; padding:6px 12px; border-radius:999px; cursor:pointer;}
+  .mode button.on{background:linear-gradient(135deg,var(--accent),var(--accent2)); color:#fff;}
+  body[data-mode="gym"] .homeonly, body[data-mode="home"] .gymonly{display:none;}
 
   /* Stats strip */
   .stats{display:flex; gap:8px; margin-top:14px;}
@@ -117,8 +122,15 @@
 <body>
 <div class="wrap">
   <header>
-    <h1>WCS + Aesthetics</h1>
-    <div class="sub">4-day plan · built for leading & the V-taper · ~25–40 min/session</div>
+    <div class="htop">
+      <h1>WCS + Aesthetics</h1>
+      <div class="mode" id="modeSw">
+        <button data-mode="gym">Gym</button>
+        <button data-mode="home">Home</button>
+      </div>
+    </div>
+    <div class="sub gymonly">4-day plan · built for leading & the V-taper · ~25–40 min/session</div>
+    <div class="sub homeonly">4-day home plan · no equipment · lats & core first · ~20–30 min/session</div>
     <div class="stats">
       <div class="stat"><div class="num" id="stWeek">0</div><div class="lbl">This week</div></div>
       <div class="stat"><div class="num" id="stStreak">0</div><div class="lbl">Streak (wk)</div></div>
@@ -139,10 +151,19 @@
   <details>
     <summary>How to use this plan</summary>
     <div class="infop">
+      <div class="homeonly">
+      <p><b>Home kit:</b> a <b>sturdy table</b>, a <b>door</b>, a <b>towel</b>, a <b>bedsheet</b>, a <b>chair/couch</b>, a <b>stair</b>, a <b>backpack</b> you fill with books or water bottles, and two filled <b>water bottles/jugs</b>. That's it.</p>
+      <p><b>Safety check:</b> before table rows, lean on the table edge hard; it must not tip or slide. For door rows, stand on the side where the door opens <i>away</i> from you, so pulling pushes it into the frame. Lock it if you can.</p>
+      <p><b>Tracking box:</b> log <b>reps</b> (or the seconds you held) on bodyweight moves. On backpack/jug moves, log the <b>kg</b>. Weigh the bag on a bathroom scale.</p>
+      <p><b>Progress without weights:</b> add reps up to the top of the range, then make it harder: walk your feet further under the table, add books to the bag, lower slower (3 s down), or pause 2 s at the squeeze.</p>
+      </div>
       <p><b>Order:</b> Do the days in sequence (1→2→3→4) with a rest day whenever you need one — e.g. Mon/Tue/Thu/Fri. As a beginner, never stress about hitting all 4 perfectly; 3 solid weeks beats 4 burnt-out ones.</p>
+      <div class="gymonly">
       <p><b>Sets:</b> Tap a numbered square each time you finish a set. <b>Weight:</b> type what you used — it's remembered and pre-filled next time, so you can chase small jumps.</p>
       <p><b>Progress:</b> When every move's last weight feels easy for the top of the rep range, add a little (~2.5 kg lower body, ~1–2 kg upper). That's the whole game.</p>
       <p><b>Rest:</b> ~60–90s between sets. Use the timer button. Warm up 3–4 min on a bike/rower + 1 light set of the first exercise.</p>
+      </div>
+      <p class="homeonly"><b>Rest:</b> ~45–60s between sets. Warm up 3 min: arm circles, cat-cows, 10 bodyweight squats, 20 s marching in place.</p>
       <div class="legend">
         <span><i style="background:var(--wcs)"></i>WCS-focused</span>
         <span><i style="background:var(--looks)"></i>Looks-focused</span>
@@ -156,6 +177,7 @@
     <div class="infop">
       <p><b>WCS (leader):</b> the dance is body-led — connection comes from your <b>core and lats</b>, not your arms. Add <b>glutes/hamstrings</b> for the anchor & grounded "settle," <b>legs + ankles</b> for balance and redirections, and <b>postural back/rear delts</b> for a tall frame.</p>
       <p><b>Looks (fastest payoff):</b> the <b>V-taper</b> — <b>lateral delts</b> (shoulder width), <b>lats</b> (the flare), <b>upper chest</b>, plus <b>arms</b> and a tight <b>core</b>.</p>
+      <p class="homeonly"><b>Home version:</b> lats are the hardest muscle to train without a bar, so they get two dedicated days (table rows, door rows, towel/prone pulldowns). Core work shows up every single day, and it focuses on <b>anti-rotation and bracing</b> (dead bug, bird dog, shoulder taps), because a leader's job is to keep the center still and let it carry the lead.</p>
       <p>The overlap (lats, core, shoulders, glutes/legs) is why a handful of compound lifts covers both at once.</p>
     </div>
   </details>
@@ -179,7 +201,7 @@
 
 <script>
 /* ---------------- Plan data ---------------- */
-const PLAN = [
+const GYM_PLAN = [
   {
     key:"d1", day:"Day 1", name:"Upper · Pull",
     focus:"Lats, mid-back, rear delts & shoulders — your WCS connection muscles plus the V-taper flare.",
@@ -286,6 +308,115 @@ const PLAN = [
   }
 ];
 
+/* Home plan: no equipment, only household items. Lats + core get the most volume. */
+const HOME_PLAN = [
+  {
+    key:"h1", day:"Day 1", name:"Home · Back & Core",
+    focus:"Lats and mid-back from a table, a towel and a backpack, then deep-core bracing. This is your main connection day.",
+    ex:[
+      {id:"h1a", name:"Table Row", scheme:"3 × 6–12", tag:"both", unit:"reps",
+        cue:"Lie under a sturdy table, grip the edge, body straight like a plank. Pull your chest to the edge, elbows toward your ribs.",
+        why:"The closest you get to a pull-up at home. Lats + mid-back, the leader's connection muscles and the V-taper.",
+        alt:"Easier: bend knees, feet flat · Door-handle row (Day 4)"},
+      {id:"h1b", name:"Towel Lat Pulldown", scheme:"3 × 10 (2s squeeze)", tag:"wcs", unit:"reps",
+        cue:"Hold a towel overhead, hands wide, and pull it apart as hard as you can. Keep pulling it apart while you bring it down to your upper chest. Squeeze the lats 2 s.",
+        why:"Teaches you to feel and switch on the lats, the same 'engage without pulling with the arms' a leader uses in the frame.",
+        alt:"Behind-the-neck version (only if shoulders are comfy)"},
+      {id:"h1c", name:"Backpack Bent-Over Row", scheme:"3 × 10–15", tag:"both", unit:"kg",
+        cue:"Fill a backpack with books, hold it by the top strap. Hinge forward with a flat back and row it to your belly button.",
+        why:"Loaded rowing for back thickness and posture. Add books as you get stronger.",
+        alt:"One-arm row with a full water jug, other hand on a chair"},
+      {id:"h1d", name:"Prone Y-T-W Raise", scheme:"2 × 6 each letter", tag:"wcs", unit:"reps",
+        cue:"Lie face down, forehead on a towel. Lift arms into a Y, then a T, then a W, thumbs up, 2 s hold each rep.",
+        why:"Rear delts and lower traps pull the shoulders back for a tall, clean dance frame.",
+        alt:"Reverse snow angels"},
+      {id:"h1e", name:"Dead Bug", scheme:"3 × 8 / side", tag:"wcs", unit:"reps",
+        cue:"On your back, arms up, knees at 90°. Press your low back into the floor and slowly extend opposite arm + leg. Exhale as you go.",
+        why:"Keeps your trunk stable while your limbs move. That's leading: a still, braced center while arms and legs do the work.",
+        alt:"Easier: move legs only"}
+    ]
+  },
+  {
+    key:"h2", day:"Day 2", name:"Home · Legs",
+    focus:"Glutes, hamstrings and ankles for the anchor and a grounded settle, with a side-plank core finisher.",
+    ex:[
+      {id:"h2a", name:"Backpack Goblet Squat", scheme:"3 × 12–15", tag:"both", unit:"kg",
+        cue:"Hug the loaded backpack to your chest, sit straight down between your heels, knees track over toes.",
+        why:"Full-leg strength for soft knees and a grounded, powerful base.",
+        alt:"Bodyweight squat with a 3 s lowering"},
+      {id:"h2b", name:"Single-Leg Glute Bridge", scheme:"3 × 10 / side", tag:"both", unit:"reps",
+        cue:"On your back, one foot planted, other leg up. Drive through the heel, squeeze the glute at the top for 1 s.",
+        why:"Glutes power the anchor step and keep your hips stable when you redirect.",
+        alt:"Harder: foot up on the couch · Easier: both feet"},
+      {id:"h2c", name:"Backpack Romanian Deadlift", scheme:"3 × 10–12", tag:"wcs", unit:"kg",
+        cue:"Hold the backpack in front of your thighs, soft knees, push hips back until the hamstrings stretch, then stand tall.",
+        why:"Hamstrings + hip hinge for the 'sit into the floor' settle and posture.",
+        alt:"Single-leg RDL, bodyweight, holding a wall"},
+      {id:"h2d", name:"Single-Leg Calf Raise (stair)", scheme:"2 × 12–15 / side", tag:"wcs", unit:"reps",
+        cue:"Ball of foot on a stair edge, hold the rail. Full stretch down, rise all the way up, 1 s hold.",
+        why:"Ankles and calves for balance, rolling through the feet and quick redirections.",
+        alt:"Flat floor, both feet"},
+      {id:"h2e", name:"Side Plank", scheme:"3 × 20–30s / side", tag:"wcs", unit:"s",
+        cue:"Elbow under shoulder, hips high, body in one line. Don't let the hip sag.",
+        why:"Obliques + lateral core: keeps your body from folding sideways when you lead a turn.",
+        alt:"Easier: knees down"}
+    ]
+  },
+  {
+    key:"h3", day:"Day 3", name:"Home · Push & Core",
+    focus:"Chest, shoulders and arms for the looks, plus hollow-body core work and a posture move to balance the pushing.",
+    ex:[
+      {id:"h3a", name:"Push-Up", scheme:"3 × 6–15", tag:"both", unit:"reps",
+        cue:"Hands just outside shoulders, body rigid, elbows ~45° from the body. Chest to a fist-height off the floor.",
+        why:"Chest, triceps and front delts, plus it's a moving plank for your core.",
+        alt:"Easier: hands on table/couch · Harder: feet on couch (upper chest)"},
+      {id:"h3b", name:"Pike Push-Up", scheme:"3 × 6–10", tag:"looks", unit:"reps",
+        cue:"Hips high in an upside-down V, lower the top of your head toward the floor between your hands, press back up.",
+        why:"The home version of an overhead press, for shoulder size and strength.",
+        alt:"Easier: hands on a step · Harder: feet on couch"},
+      {id:"h3c", name:"Water-Jug Lateral Raise", scheme:"3 × 12–20", tag:"looks", unit:"kg",
+        cue:"A full bottle or jug in each hand, lead with the elbows, raise to shoulder height. Slow down.",
+        why:"Side delts = shoulder width, the biggest visual upgrade. Light jugs are enough if you go slow.",
+        alt:"Backpack held by one strap, one arm at a time"},
+      {id:"h3d", name:"Reverse Snow Angel", scheme:"2 × 10", tag:"wcs", unit:"reps",
+        cue:"Face down, arms by your sides, lift them just off the floor and sweep them overhead and back, like a snow angel.",
+        why:"Balances all the pushing. Opens the chest and keeps the shoulders back.",
+        alt:"Prone Y-T-W raise"},
+      {id:"h3e", name:"Hollow Body Hold", scheme:"3 × 20–30s", tag:"both", unit:"s",
+        cue:"On your back, low back glued to the floor, arms and legs extended and hovering. Tuck knees in if the back lifts.",
+        why:"Front-core tension: the brace that makes your lead clear and your abs visible.",
+        alt:"Easier: knees bent (tuck hold)"}
+    ]
+  },
+  {
+    key:"h4", day:"Day 4", name:"Home · Lats & Legs",
+    focus:"Second lat day, anti-rotation core (the leader's stable center) and single-leg balance.",
+    ex:[
+      {id:"h4a", name:"Door Row", scheme:"3 × 10–15", tag:"both", unit:"reps",
+        cue:"Knot a bedsheet, shut it in a door that opens away from you (or grip both handles of an open door, feet either side). Lean back, arms straight, then row your chest to your hands.",
+        why:"More lat and mid-back volume. The closer your feet are to the door, the harder it gets.",
+        alt:"Table row · Towel around a sturdy post/railing"},
+      {id:"h4b", name:"Prone Lat Pulldown", scheme:"3 × 10–12", tag:"wcs", unit:"reps",
+        cue:"Lie face down, arms overhead, lift chest and arms slightly. Pull elbows down to your ribs as if doing a pulldown, squeeze 2 s, reach back out.",
+        why:"Lat activation plus back extensors, so you stand tall through the whole dance.",
+        alt:"Towel lat pulldown"},
+      {id:"h4c", name:"Bulgarian Split Squat", scheme:"2 × 8–10 / side", tag:"both", unit:"reps",
+        cue:"Rear foot on the couch or a chair, front foot far enough out. Drop straight down, front knee over the foot. Do it barefoot to train the ankles.",
+        why:"Single-leg strength and balance. Every WCS step is a single-leg moment.",
+        alt:"Easier: reverse lunge · Harder: hold the backpack"},
+      {id:"h4d", name:"Bird Dog", scheme:"3 × 8 / side (2s hold)", tag:"wcs", unit:"reps",
+        cue:"On all fours, reach opposite arm and leg long without rocking your hips. Imagine a glass of water on your low back.",
+        why:"Cross-body core control, the pattern behind leading with your center rather than your arms.",
+        alt:"Harder: touch elbow to knee under the body"},
+      {id:"h4e", name:"Plank Shoulder Taps", scheme:"3 × 10 / side", tag:"both", unit:"reps",
+        cue:"High plank, feet wide. Tap the opposite shoulder slowly and keep your hips completely still.",
+        why:"Anti-rotation core: it stops your torso twisting unintentionally, so your lead reads clean.",
+        alt:"Easier: from the knees · Regular plank 3 × 30–45s"}
+    ]
+  }
+];
+const PLANS = {gym:GYM_PLAN, home:HOME_PLAN};
+
 /* ---------------- State / storage ---------------- */
 const LS_KEY = "wcsPlan.v1";
 function load(){ try{ return JSON.parse(localStorage.getItem(LS_KEY)) || {}; }catch(e){ return {}; } }
@@ -308,7 +439,11 @@ function weekKey(dateStr){
 if(state.lastReset !== todayStr()){ state.sets = {}; state.lastReset = todayStr(); save(); }
 
 /* ---------------- Render ---------------- */
-let activeDay = state.activeDay || 0;
+state.mode = state.mode || "gym";
+state.activeDayBy = state.activeDayBy || {gym: state.activeDay || 0, home: 0};
+let PLAN = PLANS[state.mode];
+let activeDay = state.activeDayBy[state.mode];
+const REST = {gym:90, home:60};
 const tabsEl = document.getElementById("tabs");
 const exListEl = document.getElementById("exList");
 
@@ -321,7 +456,7 @@ function renderTabs(){
     const t = document.createElement("div");
     t.className = "tab" + (i===activeDay?" active":"") + (isDayDone(d)?" done":"");
     t.innerHTML = `<div class="d">${d.day}</div><div class="t">${d.name.split(" · ")[1]}</div>`;
-    t.onclick = ()=>{ activeDay=i; state.activeDay=i; save(); renderAll(); };
+    t.onclick = ()=>{ activeDay=i; state.activeDayBy[state.mode]=i; save(); renderAll(); };
     tabsEl.appendChild(t);
   });
 }
@@ -346,7 +481,7 @@ function renderDay(){
       <div class="top">
         <div>
           <p class="nm">${e.name}</p>
-          <div class="scheme"><b>${e.scheme}</b> · rest 60–90s</div>
+          <div class="scheme"><b>${e.scheme}</b> · rest ${state.mode==="home"?"45–60s":"60–90s"}</div>
         </div>
         <span class="tag ${e.tag}">${e.tag==="both"?"WCS + Looks":e.tag.toUpperCase()}</span>
       </div>
@@ -356,7 +491,7 @@ function renderDay(){
       <button class="whybtn" data-why="${e.id}">Why this?</button>
       <div class="track">
         <div class="sets">${setBtns}</div>
-        <div class="wt"><input type="text" inputmode="decimal" placeholder="–" value="${state.weights[e.id]||""}" data-wt="${e.id}"><span>kg</span></div>
+        <div class="wt"><input type="text" inputmode="decimal" placeholder="–" value="${state.weights[e.id]||""}" data-wt="${e.id}"><span>${e.unit||"kg"}</span></div>
       </div>`;
     exListEl.appendChild(card);
   });
@@ -414,7 +549,20 @@ function renderHistory(){
     .map(h=>`<div class="row"><span>${h.dayName}</span><span>${h.date}</span></div>`).join("");
 }
 
-function renderAll(){ renderTabs(); renderDay(); renderStats(); renderHistory(); }
+function renderMode(){
+  document.body.dataset.mode = state.mode;
+  document.querySelectorAll("#modeSw button").forEach(b=> b.classList.toggle("on", b.dataset.mode===state.mode));
+  if(!tIv) tBtn.textContent = "Rest "+REST[state.mode]+"s";
+}
+document.querySelectorAll("#modeSw button").forEach(b=>{
+  b.onclick = ()=>{
+    if(b.dataset.mode===state.mode) return;
+    state.mode = b.dataset.mode; PLAN = PLANS[state.mode]; activeDay = state.activeDayBy[state.mode];
+    save(); renderAll(); window.scrollTo({top:0});
+  };
+});
+
+function renderAll(){ renderMode(); renderTabs(); renderDay(); renderStats(); renderHistory(); }
 
 /* ---------------- Complete session ---------------- */
 document.getElementById("doneBtn").onclick = ()=>{
@@ -423,7 +571,7 @@ document.getElementById("doneBtn").onclick = ()=>{
   // reset this day's set checkmarks so it's fresh next time; weights stay
   d.ex.forEach(e=> state.sets[e.id]=0);
   // auto-advance to next day
-  activeDay=(activeDay+1)%PLAN.length; state.activeDay=activeDay;
+  activeDay=(activeDay+1)%PLAN.length; state.activeDayBy[state.mode]=activeDay;
   save(); renderAll();
   toast("Logged! Next up: "+PLAN[activeDay].name);
 };
@@ -432,10 +580,10 @@ document.getElementById("doneBtn").onclick = ()=>{
 let tIv=null, tLeft=0;
 const tBtn=document.getElementById("timerBtn");
 tBtn.onclick=()=>{
-  if(tIv){ clearInterval(tIv); tIv=null; tBtn.classList.remove("run"); tBtn.textContent="Rest 90s"; return; }
-  tLeft=90; tBtn.classList.add("run");
+  if(tIv){ clearInterval(tIv); tIv=null; tBtn.classList.remove("run"); tBtn.textContent="Rest "+REST[state.mode]+"s"; return; }
+  tLeft=REST[state.mode]; tBtn.classList.add("run");
   tick();
-  tIv=setInterval(()=>{ tLeft--; if(tLeft<=0){ clearInterval(tIv); tIv=null; tBtn.classList.remove("run"); tBtn.textContent="Go!"; buzz(); setTimeout(()=>{tBtn.textContent="Rest 90s";},1500); } else tick(); },1000);
+  tIv=setInterval(()=>{ tLeft--; if(tLeft<=0){ clearInterval(tIv); tIv=null; tBtn.classList.remove("run"); tBtn.textContent="Go!"; buzz(); setTimeout(()=>{tBtn.textContent="Rest "+REST[state.mode]+"s";},1500); } else tick(); },1000);
 };
 function tick(){ tBtn.textContent=tLeft+"s"; }
 function buzz(){ if(navigator.vibrate) navigator.vibrate([120,60,120]); }
@@ -443,7 +591,7 @@ function buzz(){ if(navigator.vibrate) navigator.vibrate([120,60,120]); }
 /* ---------------- Reset ---------------- */
 document.getElementById("resetBtn").onclick=()=>{
   if(confirm("Erase all weights, progress and history on this device?")){
-    localStorage.removeItem(LS_KEY); state={weights:{},sets:{},history:[],lastReset:todayStr(),activeDay:0}; activeDay=0; save(); renderAll(); toast("Reset done");
+    localStorage.removeItem(LS_KEY); state={weights:{},sets:{},history:[],lastReset:todayStr(),mode:state.mode,activeDayBy:{gym:0,home:0}}; activeDay=0; save(); renderAll(); toast("Reset done");
   }
 };
 
